@@ -2,7 +2,7 @@ import { join } from 'path'
 import { writeFileSync, readFileSync, existsSync } from 'fs'
 import glob from 'tiny-glob'
 import sjcl from 'sjcl'
-import cheerio from 'cheerio'
+import {load as loadCheerio} from 'cheerio'
 import { applyToDefaults } from '@hapi/hoek'
 
 const manifest_filename = 'manifest.json'
@@ -13,7 +13,7 @@ function hash_script (s) {
 }
 
 function generate_csp (html) {
-	const $ = cheerio.load(html)
+	const $ = loadCheerio(html)
 	const csp_hashes = $('script[type="module"]')
 		.map((i, el) => hash_script($(el).get()[0].children[0].data))
 		.toArray()
@@ -22,23 +22,22 @@ function generate_csp (html) {
 	return `script-src 'self' ${csp_hashes}; object-src 'self'`
 }
 
-function generate_manifest (html, manifest_version) {
-	const project_placeholders = {
-		name: 'TODO',
-		version: '0.1'
-	}
-	if (manifest_version === 2) {
+function generate_manifest (html, manifest = {}) {
+	if (manifest.version === 2) {
 		return {
+			name: 'TODO',
+			version: '0.1',
 			manifest_version: 2,
 			browser_action: {
 				default_title: 'SvelteKit',
 				default_popup: 'index.html'
 			},
 			content_security_policy: generate_csp(html),
-			...project_placeholders
 		}
 	}
 	return {
+		name: 'TODO',
+		version: '0.1',
 		manifest_version: 3,
 		action: {
 			default_title: 'SvelteKit',
@@ -47,7 +46,7 @@ function generate_manifest (html, manifest_version) {
 		content_security_policy: {
 			"extension_pages": "script-src 'self'; object-src 'self'"
 		},
-		...project_placeholders
+		...manifest
 	}
 }
 
@@ -62,12 +61,12 @@ function load_manifest () {
 // Quick and dirty helper function to externalize scripts. Will become obsolete once kit provides a config option to do this ahead of time.
 function externalizeScript(html, assets) {
 	return html.replace(
-		/<script type="module" data-hydrate="([\s\S]+)">([\s\S]+)<\/script>/,
+		/<script type="module" data-sveltekit-hydrate="([\s\S]+)">([\s\S]+)<\/script>/,
 		(match, hydrationTarget, content) => {
 			const hash = Buffer.from(hash_script(content), 'base64').toString('hex');
 	         	const externalized_script_path = join(assets, `${hash}.js`);
 			writeFileSync(externalized_script_path, content);
-			return `<script type="module" data-hydrate="${hydrationTarget}" src="${hash}.js"></script>`;
+			return `<script type="module" data-sveltekit-hydrate="${hydrationTarget}" src="${hash}.js"></script>`;
 		}
 	);
 }
@@ -90,7 +89,6 @@ export default function ({ pages = 'build', assets = pages, fallback, manifestVe
 			builder.rimraf(assets)
 			builder.rimraf(pages)
 
-			builder.writeStatic(assets)
 			builder.writeClient(assets)
 
 			builder.writePrerendered(pages, { fallback });
