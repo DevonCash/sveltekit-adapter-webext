@@ -72,7 +72,7 @@ function externalizeScript(html, assets) {
 }
 
 /** @type {import('.')} */
-export default function ({ pages = 'build', assets = pages, fallback, manifestVersion = 3 } = {}) {
+export default function ({ pages = 'build', assets = pages, fallback, manifest = {manifest_version: 3} } = {}) {
 	return {
 		name: 'sveltekit-adapter-browser-extension',
 
@@ -108,7 +108,7 @@ export default function ({ pages = 'build', assets = pages, fallback, manifestVe
             			});
             		}
 
-			const generated_manifest = generate_manifest(index.toString(), manifestVersion)
+			const generated_manifest = generate_manifest(index.toString(), manifest)
 			const merged_manifest = applyToDefaults(generated_manifest, provided_manifest, { nullOverride: true })
 
 			writeFileSync(join(assets, manifest_filename), JSON.stringify(merged_manifest))
