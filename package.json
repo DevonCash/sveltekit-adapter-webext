@@ -1,5 +1,5 @@
 {
-  "name": "sveltekit-adapter-browser-extension",
+  "name": "sveltekit-adapter-webext",
   "version": "0.3.0",
   "description": "Build cross-browser extensions with SvelteKit",
   "main": "adapter-browser-extension.mjs",
