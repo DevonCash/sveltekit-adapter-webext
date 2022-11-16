@@ -99,7 +99,7 @@ export default function ({ pages = 'build', assets = pages, fallback, manifest =
 			/** The content security policy of manifest_version 3 does not allow for inlined scripts.
 			Until kit implements a config option (#1776) to externalize scripts, the below code block should do 
 			for a quick and dirty externalization of the scripts' contents **/
-            		if (manifestVersion === 3) {
+            		if (manifest.manifest_version === 3) {
                 		const HTML_files = await glob('**/*.html', { cwd: pages, dot: true, absolute: true, filesOnly: true })  
                 		HTML_files.forEach(path => {
                     			let html = readFileSync(path, {encoding:'utf8'})
