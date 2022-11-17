@@ -33,6 +33,7 @@ function generate_manifest (html, manifest = {}) {
 				default_popup: 'index.html'
 			},
 			content_security_policy: generate_csp(html),
+			...manifest
 		}
 	}
 	return {
