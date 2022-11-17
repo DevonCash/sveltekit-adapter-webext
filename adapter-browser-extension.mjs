@@ -23,7 +23,7 @@ function generate_csp (html) {
 }
 
 function generate_manifest (html, manifest = {}) {
-	if (manifest.version === 2) {
+	if (manifest.manifest_version === 2) {
 		return {
 			name: 'TODO',
 			version: '0.1',
